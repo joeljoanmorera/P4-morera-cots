@@ -78,7 +78,7 @@ HTTP server started
 
 ###### **Visualización de la connexión a la página web**
 
-!["Página web"](https://github.com/joeljoanmorea/P4-morera-cots/blob/master/images/web_STA.png)
+!["Página web"](https://github.com/joeljoanmorera/P4-morera-cots/blob/master/images/web_STA.png)
 
 ###### **Diagrama de flujo**
 
