@@ -291,7 +291,8 @@ void loop()
     Serial.println("New Client.");          // print a message out in the serial port
     String currentLine = "";                // make a String to hold incoming data from the client
     while (client.connected()) {            // loop while the client's connected
-      if (client.available()) {                    // if the byte is a newline character
+      if (client.available()) {             // if the byte is a newline character
+        char c = client.read();
         // if the current line is blank, you got two newline characters in a row.
         // that's the end of the client HTTP request, so send a response:
         if (currentLine.length() == 0) {
@@ -367,7 +368,8 @@ void loop()
     Serial.println("New Client.");          // print a message out in the serial port
     String currentLine = "";                // make a String to hold incoming data from the client
     while (client.connected()) {            // loop while the client's connected
-      if (client.available()) {                    // if the byte is a newline character
+      if (client.available()) { 
+        char c = client.read();                   // if the byte is a newline character
         // if the current line is blank, you got two newline characters in a row.
         // that's the end of the client HTTP request, so send a response:
         if (currentLine.length() == 0) {
@@ -414,12 +416,13 @@ Client disconnected.
 ```
 
 ###### **Diagrama de flujo**
+
 ```mermaid
     flowchart LR;
     WB --> SB
 ```
 
-### Parte 3 : Encendido de LEDs por Wifi
+### Parte 3 : Encendido de LEDs por Wi-Fi
 
 ###### **Funcionamiento**
 
@@ -427,11 +430,6 @@ Client disconnected.
 
 ###### **Código del programa**
 ```cpp
-/*********
-  Rui Santos
-  Complete project details at https://randomnerdtutorials.com  
-*********/
-
 // Load Wi-Fi library
 #include <WiFi.h>
 
@@ -568,9 +566,11 @@ void loop(){
     Serial.println("");
   }
 }
-
 ```
 
+###### **Visualización de la conexión a la página web**
+
+![Control de LEDs](./images/web_leds_AP.png)
 
 ###### **Salida por terminal**
 
@@ -692,11 +692,6 @@ void loop() {
 ###### **Código del escaneador**
 
 ```cpp
-/*
-   Based on Neil Kolban example for IDF: https://github.com/nkolban/esp32-snippets/blob/master/cpp_utils/tests/BLE%20Tests/SampleScan.cpp
-   Ported to Arduino ESP32 by Evandro Copercini
-*/
-
 #include <Arduino.h>
 #include <BLEDevice.h>
 #include <BLEUtils.h>
@@ -737,7 +732,8 @@ void loop() {
 
 ###### **Código del cliente**
 
-
+```cpp
+```
 
 ###### **Salida por terminal**
 
@@ -760,6 +756,7 @@ Advertised Device: Name: , Address: c9:92:1c:c7:c9:8f, manufacturer data: 4c0012
 Devices found: 7
 Scan done!
 ```
+
 Cliente:
 
 ```
