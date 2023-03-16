@@ -2,15 +2,15 @@
 
 ## Generación de una página web
 
-### Parte 1
+### Parte 1 : Ejemplo de prueba
 
 ###### **Funcionamiento**
 
 El programa en cuestión consiste en utilizar el ESP32 como servidor para generar una página web a la qual podemos acceder mediante la IP del procesador.
 
-Para ello, en primer lugar, nos conectamos a una red WiFi, especificando su SSID y contrseña. Una vez establecida la conexión, iniciamos el servidor cuyo código HTML viene definido dentro del programa.
+Para ello, en primer lugar, nos conectamos a una red Wi-Fi, especificando su SSID y contrseña. Una vez establecida la conexión, iniciamos el servidor cuyo código HTML viene definido dentro del programa.
 
-Respecto al serividor, cabe destacar que utilizamos el puerto 80, que esta asociado al protocolo de internet HTTP.
+Respecto al servidor, cabe destacar que utilizamos el puerto 80, que esta asociado al protocolo de internet HTTP.
 
 ###### **Código del programa**
 
@@ -27,7 +27,7 @@ WebServer server(80);// Object of WebServer(HTTP port, 80 is default)
 void setup() 
 {
     Serial.begin(115200);
-    Serial.println("Try Connecting to ");
+    Serial.print("Try Connecting to ");
     Serial.println(ssid);
     // Connect to your wi-fi modem
     WiFi.begin(ssid, password);
@@ -70,8 +70,7 @@ void handle_root()
 ###### **Salida por terminal**
 
 ```
-Try Connecting to 
-******
+Try Connecting to ******
 ...
 WiFi connected successfully
 Got IP: 192.168.1.145
@@ -80,35 +79,35 @@ HTTP server started
 
 ###### **Visualización de la conexión a la página web**
 
-![Página web](https://github.com/joeljoanmorera/P4-morera-cots/blob/master/images/web_STA.png)
+![Página web](/images/web_STA.png)
 
 ###### **Diagrama de flujo**
 
 ```mermaid
     flowchart LR;
 
-    pss("Contraseña") & ssid("SSID")--> WB;
+    pss(Contraseña) & ssid(SSID)--> WB;
 
-    WB(["Inicialización de Wifi"]) --> CW;
+    WB([Inicialización de Wi-Fi]) --> CW;
 
-    CW(["Conexión a red wifi"]) --> if;
+    CW([Conexión a red Wi-Fi]) --> if;
 
-    if("Si conexión exitosa") --> HS & SP;
+    if(Si conexión exitosa) --> HS & SP;
 
     subgraph SP [Imprimimos por pantalla]
-        ICW(["Conexión exitosa"]);
-        IIP(["La IP del microprocesador"]);
-        SI([El inicio exitoso del servidor]);
+        ICW([Conexión exitosa]);
+        IIP([IP del microprocesador]);
+        SI([Inicio exitoso del servidor]);
     end;
 
-    HS(["Iniciamos el servidor"]) -..-> SI;
+    HS([Iniciamos el servidor]) -..-> SI;
 ```
 
-### Parte 2
+### Parte 2 : HTML de un fichero de Markdown
 
 ###### **Funcionamiento**
 
-En la segunda parte de la primer ejercicio de la práctica, en lugar de mostrar simplemente un título en la página web, ahora aparecerá el código HTML de un fichero Markdown, cuyo contenido ha sido exportado a HTML, que aparece en `index.html`
+En la segunda parte de la primer ejercicio de la práctica, en lugar de mostrar simplemente un título en la página web, ahora aparecerá el código HTML de un fichero Markdown, cuyo contenido ha sido exportado en `index.html`
 
 ###### **Código del programa**
 
@@ -570,16 +569,16 @@ char* HTML = "<!DOCTYPE html>"
 
 "    pss('Contraseña') & ssid('SSID')--> WB;"
 
-"    WB(['Inicialización de Wifi']) --> CW;"
+"    WB(['Inicialización de Wi-Fi']) --> CW;"
 
-"    CW(['Conexión a red wifi']) --> if;"
+"    CW(['Conexión a red Wi-Fi']) --> if;"
 
 "    if('Si conexión exitosa') --> HS & SP;"
 
 "    subgraph SP [Imprimimos por pantalla]"
 "        ICW(['Conexión exitosa']);"
-"        IIP(['La IP del microprocesador']);"
-"        SI([El inicio exitoso del servidor]);"
+"        IIP(['IP del microprocesador']);"
+"        SI([Inicio exitoso del servidor]);"
 "    end;"
 
 "    HS(['Iniciamos el servidor']) -..-> SI;"
@@ -597,22 +596,21 @@ void handle_root()
 
 ###### **Visualización de la conexión a la página web**
 
-![Página web](https://github.com/joeljoanmorera/P4-morera-cots/blob/master/images/web_index-html_STA.png)
+![Página web](/images/web_index-html_STA.png)
 
-## Communicación Bluetooth Classic
+## Comunicación Bluetooth Classic
 
 ###### **Funcionamiento**
 
 El programa en cuestión consiste en usar *Bluetooth Classic* para comunicar el ESP32 con otro dispositivo.
 
-Para ello, utilizamos la libreria `BluetoothSerial.h`, mediante esta habilitamos la conexión usando `SerialBT.begin("ESP32test")` siendo "ESP32test" el nombre con el que aparecera el dispositivo y `SerialBT` la variable creada con la libreria.
+Para ello, utilizamos la libreria `BluetoothSerial.h`, mediante esta habilitamos la conexión usando `SerialBT.begin("ESP32test")` siendo `ESP32test` el nombre con el que aparece el dispositivo y `SerialBT` la variable creada con la libreria.
 
-Una vez establecida la conexión, utilizando aplicaciones como `Serial Bluetooth Terminal` podemos escribir y leer texto. El procesador leerá el texto que escribamos en la terminal de la apliación y lo escribirá en el puerto serie. Seguidamente, leera el mensaje que aparece en el puerto serie, mandará los datos por Bluetooth y se escribiran en la terminal de la aplicación.
+Una vez establecida la conexión, utilizando aplicaciones como `Serial Bluetooth Terminal` podemos escribir y leer texto en una terminal conectada al ESP32 mediante *Bluetooth*. El procesador leerá el texto que escribamos en la terminal de la apliación y lo escribirá en el puerto serie. Seguidamente, leera el mensaje que aparece en el puerto serie, enviará los datos al dispositivo  y se escribirán en la terminal de la aplicación.
 
 ###### **Código del programa**
 
 ```cpp
-
 //This example code is in the Public Domain (or CC0 licensed, at your option.)
 //By Evandro Copercini - 2018
 //
@@ -649,8 +647,6 @@ void loop()
 
 ###### **Salida por terminal**
 
-A continuación podemos ver los mensajes que aparecieron durante la ejecución del programa en el puerto serie. Todos estos mensajes se escribieron desde la aplicacion `Serial Bluetooth Terminal`, excepto el mensaje que informa del inicio del dispositivo.
-
 ```
 The device started, now you can pair it with bluetooth!
 Hola 
@@ -658,6 +654,8 @@ Pruebas de conexión 1
 Pruebas de conexión 2
 Fin de la conexión 
 ```
+
+> **Nota:** Estos son los mensajes que aparecieron durante la ejecución del programa en el puerto serie. Todos estos mensajes se escribieron desde la aplicacion `Serial Bluetooth Terminal`, excepto el mensaje que informa del inicio del dispositivo.
 
 ###### **Diagrama de flujo**
 
@@ -670,21 +668,19 @@ Fin de la conexión
 
     WS(Escribimos el contenido leído por el puerto serie) --> D([Retraso de 20 ms]) --> WB
 
-    RS([Leemos puerto serie]) --> WB
+    RS([Leemos puerto serie]) --> WS
 
-    RB([Leemos puerto Bluetooth]) --> WS
+    RB([Leemos puerto Bluetooth]) --> WB
     
 ```
 
-## Generación página web realizando un AP
+## Generación página web mediante un AP
 
 ###### **Funcionamiento**
 
-El ESP32 puede trabajar de dos maneras, en lo que a WiFi se refiere, como estación de WiFi(*Wi-Fi Station*) o como punto de acceso(*Acces Point*). El primer tipo de conexión la hemos visto en el primer ejercicio, en este veremos el segundo tipo.
+El ESP32 puede trabajar de dos maneras, en lo que a Wi-Fi se refiere, como estación de Wi-Fi(*Wi-Fi Station*) o como punto de acceso(*Acces Point*). El primer tipo de conexión la hemos visto en el primer ejercicio, en este veremos el segundo tipo.
 
-La principal diferencia entre las dos consiste en que ahora el ESP32 creara su propia red Wi-Fi a la que se pueden conectar dispositivos.
-
-Por lo que, teniendo en cuenta este concepto, generaremos una página web a la cual solo se puede acceder connectandose a la red del ESP32.
+La principal diferencia entre las dos consiste en que ahora el ESP32 creara su propia red Wi-Fi. Por lo que,  si generaremos una página solo los dispositivos que esten conectados  a la red del ESP32 la podran ver.
 
 ### Parte 1 : Ejemplo de prueba
 
@@ -698,7 +694,7 @@ Por lo que, teniendo en cuenta este concepto, generaremos una página web a la c
 String HTML = " <!DOCTYPE html>\
                 <html>\
                     <body>\
-                        <h1>My Primera Pagina con ESP32 - Station Mode &#128522;</h1>\
+                        <h1>My Primera Pagina con ESP32 - AP Mode &#128522;</h1>\
                     </body>\
                 </html>";
 
@@ -708,14 +704,6 @@ const char* password = "123456789";
 
 // Set web server port number to 80
 WiFiServer server(80);
-
-// Auxiliar variables to store the current output state
-String output26State = "off";
-String output27State = "off";
-
-// Assign output variables to GPIO pins
-const int output26 = 26;
-const int output27 = 27;
 
 void setup() {
   Serial.begin(115200);
@@ -771,9 +759,9 @@ void loop()
 }
 ```
 
-###### **Visualización de la connexión a la página web**
+###### **Visualización de la conexión a la página web**
 
-!["Página web"](https://github.com/joeljoanmorera/P4-morera-cots/blob/master/images/web_STA.png)
+!["Página web"](./images/web_AP.png)
 
 ### Parte 2: HTML de un fichero de Markdown
 
@@ -1226,14 +1214,6 @@ const char* password = "123456789";
 // Set web server port number to 80
 WiFiServer server(80);
 
-// Auxiliar variables to store the current output state
-String output26State = "off";
-String output27State = "off";
-
-// Assign output variables to GPIO pins
-const int output26 = 26;
-const int output27 = 27;
-
 void setup() {
   Serial.begin(115200);
 
@@ -1288,10 +1268,9 @@ void loop()
 }
 ```
 
-###### **Visualización de la connexión a la página web**
+###### **Visualización de la conexión a la página web**
 
-<!-- !["Página web"](https://github.com/joeljoanmorera/P4-morera-cots/blob/master/images/web_index-html_STA.png) -->
-![](./images/web_index-html_STA.png)
+![Pagina web index.html](/images/web_index-html_STA.png)
 
 ###### **Salida por terminal**
 
@@ -1310,7 +1289,7 @@ Client disconnected.
     WB --> SB
 ```
 
-## Bluetooth low energy (BLE)
+## Comunciación Bluetooth Low Energy (BLE)
 
 ###### **Funcionamiento**
 
@@ -1328,7 +1307,7 @@ Por lo que, en este ejercicio, aparecen dos códigos, uno del servidor y otro de
     Ported to Arduino ESP32 by Evandro Copercini
     updates by chegewara
 */
-
+#include <Arduino.h>
 #include <BLEDevice.h>
 #include <BLEUtils.h>
 #include <BLEServer.h>
@@ -1343,7 +1322,7 @@ void setup() {
   Serial.begin(115200);
   Serial.println("Starting BLE work!");
 
-  BLEDevice::init("Long name works now");
+  BLEDevice::init("ESP32-Server");
   BLEServer *pServer = BLEDevice::createServer();
   BLEService *pService = pServer->createService(SERVICE_UUID);
   BLECharacteristic *pCharacteristic = pService->createCharacteristic(
@@ -1352,7 +1331,7 @@ void setup() {
                                          BLECharacteristic::PROPERTY_WRITE
                                        );
 
-  pCharacteristic->setValue("Hello World says Neil");
+  pCharacteristic->setValue("Hola Mundo via BLE");
   pService->start();
   // BLEAdvertising *pAdvertising = pServer->getAdvertising();  // this still is working for backward compatibility
   BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
@@ -1378,6 +1357,7 @@ void loop() {
    Ported to Arduino ESP32 by Evandro Copercini
 */
 
+#include <Arduino.h>
 #include <BLEDevice.h>
 #include <BLEUtils.h>
 #include <BLEScan.h>
@@ -1417,8 +1397,24 @@ void loop() {
 
 ###### **Salida por terminal**
 
-```bash
+Servidor:
 
+```
+
+```
+
+Cliente:
+
+```
+Advertised Device: Name: , Address: 0e:96:82:2c:d1:c6, manufacturer data: 060001092002dfe0172dd546b939484ea970e97cfe84587204aa2c9589, rssi: -57 
+Advertised Device: Name: , Address: 64:b8:fc:6b:7b:11, manufacturer data: 4c001005161897dccd, txPower: 12, rssi: -45 
+Advertised Device: Name: , Address: 54:bd:79:bd:27:da, manufacturer data: 7500420401804054bd79bd27da56bd79bd27d901000000000000, rssi: -97 
+Advertised Device: Name: , Address: 68:af:2e:64:1f:e0, manufacturer data: 4c0010061f1e576d8c6a, txPower: 12, rssi: -89 
+Advertised Device: Name: , Address: ed:bf:47:d0:16:ec, manufacturer data: 4c0012020002, rssi: -88 
+Advertised Device: Name: Galaxy Watch Active2(1911) LE, Address: d8:a8:9f:dd:f3:22, appearance: 192, manufacturer data: 750001000200010302, rssi: -89 
+Advertised Device: Name: , Address: c9:92:1c:c7:c9:8f, manufacturer data: 4c0012020001, rssi: -48 
+Devices found: 7
+Scan done!
 ```
 
 ###### **Diagrama de flujo**
@@ -1427,7 +1423,10 @@ void loop() {
     flowchart LR
 
     subgraph S [Servidor]
+        
     end
+
+    S ==> C;
 
     subgraph C [Cliente]
     end
