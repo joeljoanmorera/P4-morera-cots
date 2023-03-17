@@ -959,14 +959,34 @@ New value : Hola Mundo via BLE
       SCR([Creamos el servidor]) --> SCS
       SCS([Creamos servicio con sus características]) --> SV
       SV(Definimos valor que aparecera) --> SI
-      SI([Inciamos servicio]) --> SA
-      SA([El servidor empieza a emitir])
+      SI([Inciamos servicio]) --> SA([El servidor empieza a emitir])
     end
 
-    S ==> SC ==> C;
+    S ==> SC & C
 
     subgraph C [Cliente]
+      CID(Iniciamos el dispositivo) --> CSC
+
+      CSC([Activamos el escaneo de los dispositivos cercanos]) --> ifCC
       
+      Advertise --> ifCC
+
+      ifCC{Si orden de conectarse a servidor a valor alto} --> CC
+
+      subgraph CC [Conexión al servidor]
+        CrC([Creamos un cliente]) --> CrA
+        CrA([Conexión al servidor mediante la dirección guardada]) --> CrS
+        CrS([Obtenemos el servicio UUID y la característica UUID])
+      end
+
+      CC --> ifC
+      ifC{Si procesos de conexión exitosos} --> CrI
+      ifC -- Si no --> NotIfC([Imrpimimos por pantalla la imposibilidad de conectarse])
+
+      CrI([Imprimos que la conexión al servidor ha sido exitosa]) --> CrO
+      CrO([Orden de conectarse a servidor a valor bajo]) --> ifCD
+
+      ifCD{Si leemos nuevos los datos del servidor} --> CD([Imprimimos por pantalla el nuevo valor])
     end
 
     subgraph SC [Scanner]
@@ -976,4 +996,6 @@ New value : Hola Mundo via BLE
       SCIP([Imprimimos por pantalla los dispositivos encontrados]) --> SCD
       SCD([Borramos los resultados del escaneo y aplicamos retraso de 2 segs]) --> LSC
     end
+
+    style CC stroke:#0d1017,stroke-width:2px,stroke-dasharray: 5 5
 ```
