@@ -412,9 +412,11 @@ void loop()
 ```
 AP IP address: 192.168.4.1
 New Client.
+<Add client data>
 Client disconnected.
 
 New Client.
+<Add client data>
 Client disconnected.
 ```
 
@@ -662,7 +664,7 @@ Client disconnected.
   flowchart TB;
 
     subgraph L [Programa principal]
-      LS[Escuchamos nuevos clienes] --> LS & CC
+      LS[Escuchamos a los clientes entrantes] --> LS & CC
       CC{Si nuevo cliente conectado} --> INC[Imprimimos por pantalla que hay un nuevo cliente]
       INC --> WCC
       subgraph WCC [Mientras el cliente este conectado y disponible]
@@ -673,11 +675,11 @@ Client disconnected.
         26OFF{Si recibimos header del pin 26 a valor bajo} --> L26B([LED 26 a valor bajo])
         27OFF{Si recibimos header del pin 27 a valor bajo} --> L27B([LED 27 a valor bajo])
       end
-      WCC -..-> ifCD{Si cliente desconectado} --> CD([Desconctamos la conexión])
+      WCC -..-> ifCD{Si cliente desconectado} --> CD([Desconctamos la conexión]) --> LS
     end
 
      subgraph B [Setup]
-      WS([Creamos AP con contraseña y ssid generadas]) --> IP([Imprimir IP]) --> SB([Iniciamos servidor])
+      OT([Definimos los pines LED como salidas]) --> WS([Creamos AP con contraseña y ssid generadas]) --> IP([Imprimir IP]) --> SB([Iniciamos servidor])
     end
 
     B ====> L
@@ -689,7 +691,7 @@ Client disconnected.
 
 ###### **Funcionamiento**
 
-El *Bluetooth low energy* consiste en una variente del *Bluetooth* que consume menos energia mediante el uso de paquetes de datos más pequeños, además, permanece suspendido hasta que se inicializa la conexión.
+El *Bluetooth Low Energy* consiste en una variente del *Bluetooth* que consume menos energia mediante el uso de paquetes de datos más pequeños, además, permanece suspendido hasta que se inicializa la conexión.
 
 En *BLE*, tenemos dos tipos de dispositivos: el cliente y el servidor. El servidor emite una señal con tal que los clientes puedan encontrarlo y leer sus datos. Por lo que el cliente esta a la esucha de servidores y cuando encuentra el que esta buscando lee la información de este.
 
@@ -740,7 +742,8 @@ void loop() {
 ###### **Salida por terminal del servidor**
 
 ```
-
+Starting BLE work!
+Characteristic defined! Now you can read it in your phone!
 ```
 
 ###### **Código del escaneador**
@@ -801,13 +804,149 @@ Scan done!
 ###### **Código del cliente**
 
 ```cpp
+#include <Arduino.h>
+#include "BLEDevice.h"
 
+//BLE Server name (the other ESP32 name running the server sketch)
+#define bleServerName "ESP32-Server"
+
+/* UUID's of the service, characteristic that we want to read*/
+// BLE Service
+static BLEUUID bmeServiceUUID("4fafc201-1fb5-459e-8fcc-c5c9c331914b");
+
+// BLE Characteristics
+
+// Humidity Characteristic
+static BLEUUID valueCharacteristicUUID("beb5483e-36e1-4688-b7f5-ea07361b26a8");
+
+//Flags stating if should begin connecting and if the connection is up
+static boolean doConnect = false;
+static boolean connected = false;
+
+//Address of the peripheral device. Address will be found during scanning...
+static BLEAddress *pServerAddress;
+ 
+//Characteristicd that we want to read
+static BLERemoteCharacteristic* valueCharacteristic;
+
+//Activate notify
+const uint8_t notificationOn[] = {0x1, 0x0};
+const uint8_t notificationOff[] = {0x0, 0x0};
+
+//Variables to store value
+char* valueChar;
+
+//Flags to check whether new value readings are available
+boolean newValue = false;
+
+//When the BLE Server sends a new value reading with the notify property
+static void valueNotifyCallback(BLERemoteCharacteristic* pBLERemoteCharacteristic, 
+                                    uint8_t* pData, size_t length, bool isNotify) {
+  //store value
+  valueChar = (char*)pData;
+  newValue = true;
+  Serial.print(newValue);
+}
+
+//Connect to the BLE Server that has the name, Service, and Characteristics
+bool connectToServer(BLEAddress pAddress) {
+   BLEClient* pClient = BLEDevice::createClient();
+ 
+  // Connect to the remove BLE Server.
+  pClient->connect(pAddress);
+  Serial.println(" - Connected to server");
+ 
+  // Obtain a reference to the service we are after in the remote BLE server.
+  BLERemoteService* pRemoteService = pClient->getService(bmeServiceUUID);
+  if (pRemoteService == nullptr) 
+  {
+    Serial.print("Failed to find our service UUID: ");
+    Serial.println(bmeServiceUUID.toString().c_str());
+    return (false);
+  }
+ 
+  // Obtain a reference to the characteristics in the service of the remote BLE server.
+  valueCharacteristic = pRemoteService->getCharacteristic(valueCharacteristicUUID);
+
+  if (valueCharacteristic == nullptr) 
+  {
+    Serial.print("Failed to find our characteristic UUID");
+    return false;
+  }
+  Serial.println(" - Found our characteristics");
+ 
+  //Assign callback functions for the Characteristics
+  valueCharacteristic->registerForNotify(valueNotifyCallback);
+  return true;
+}
+
+//Callback function that gets called, when another device's advertisement has been received
+class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
+  void onResult(BLEAdvertisedDevice advertisedDevice) {
+    if (advertisedDevice.getName() == bleServerName) { //Check if the name of the advertiser matches
+      advertisedDevice.getScan()->stop(); //Scan can be stopped, we found what we are looking for
+      pServerAddress = new BLEAddress(advertisedDevice.getAddress()); //Address of advertiser is the one we need
+      doConnect = true; //Set indicator, stating that we are ready to connect
+      Serial.println("Device found. Connecting!");
+    }
+  }
+};
+
+void setup() {
+  //Start serial communication
+  Serial.begin(115200);
+  Serial.println("Starting Arduino BLE Client application...");
+
+  //Init BLE device
+  BLEDevice::init("");
+ 
+  // Retrieve a Scanner and set the callback we want to use to be informed when we
+  // have detected a new device.  Specify that we want active scanning and start the
+  // scan to run for 30 seconds.
+  BLEScan* pBLEScan = BLEDevice::getScan();
+  pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
+  pBLEScan->setActiveScan(true);
+  pBLEScan->start(30);
+}
+
+void loop() {
+  // If the flag "doConnect" is true then we have scanned for and found the desired
+  // BLE Server with which we wish to connect.  Now we connect to it.  Once we are
+  // connected we set the connected flag to be true.
+  if (doConnect == true)
+  {
+    if (connectToServer(*pServerAddress)) 
+    {
+      Serial.println("We are now connected to the BLE Server.");
+      //Activate the Notify property of Characteristic
+      valueCharacteristic->getDescriptor(BLEUUID((uint16_t)0x2902))->writeValue((uint8_t*)notificationOn, 2, true);
+      connected = true;
+    }
+    else 
+    {
+      Serial.println("We have failed to connect to the server; Restart your device to scan for nearby BLE server again.");
+    }
+    doConnect = false;
+  }
+  //if new value reading is available, print in Serial
+  if (newValue){
+    newValue = false;
+    Serial.print("New value : ");
+    Serial.println(valueChar);
+  }
+  delay(1000); // Delay a second between loops.
+}
 ```
 
 ###### **Salida por  terminal del cliente**
 
 ```
-
+Starting Arduino BLE Client application...
+Device found. Connecting!
+ - Connected to 
+ - Found our characteristics
+We are now connected to the BLE Server.
+New value : Hola Mundo via BLE
 ```
 
 ###### **Diagrama de flujo**
@@ -816,14 +955,25 @@ Scan done!
     flowchart LR
 
     subgraph S [Servidor]
-
+      SID(Iniciamos el dispositivo a nombre de 'ESP-32') --> SCR
+      SCR([Creamos el servidor]) --> SCS
+      SCS([Creamos servicio con sus características]) --> SV
+      SV(Definimos valor que aparecera) --> SI
+      SI([Inciamos servicio]) --> SA
+      SA([El servidor empieza a emitir])
     end
 
     S ==> SC ==> C;
 
     subgraph C [Cliente]
+      
     end
 
     subgraph SC [Scanner]
+      ISC(Iniciamos el dispositivo) --> PSC
+      PSC([Creamos un escaneo cada 100 ms]) --> LSC
+      LSC([Iniciamos el escaneo dentro del bucle principal]) -->SCIP
+      SCIP([Imprimimos por pantalla los dispositivos encontrados]) --> SCD
+      SCD([Borramos los resultados del escaneo y aplicamos retraso de 2 segs]) --> LSC
     end
 ```
