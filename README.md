@@ -161,7 +161,7 @@ void handle_root()
 }
 ```
 
-> **Nota:** El texto del fichero HTML aparece dentro de un `string` en el fichero `index.cpp` y se hace referencia el fichero principal mediante la línea de código: `extern String HTML`.
+> **Nota:** El texto del fichero HTML aparece dentro de un `string` en el fichero `index.cpp` y en el fichero principal se hace referencia a él mediante la línea de código: `extern String HTML`.
 
 ###### **Visualización de la conexión a la página web**
 
@@ -241,9 +241,9 @@ Fin de la conexión
 
 ###### **Funcionamiento**
 
-El ESP32 puede trabajar de dos maneras, en lo que a Wi-Fi se refiere, como estación de Wi-Fi(*Wi-Fi Station*) o como punto de acceso(*Acces Point*). El primer tipo de conexión la hemos visto en el primer ejercicio, en este veremos el segundo tipo.
+El ESP32 puede trabajar de dos maneras, en lo que a Wi-Fi se refiere, como estación de Wi-Fi (*Wi-Fi Station*) o como punto de acceso (*Acces Point*). El primer tipo de conexión la hemos visto en el primer ejercicio, en este veremos el segundo tipo.
 
-La principal diferencia entre las dos consiste en que ahora el ESP32 creara su propia red Wi-Fi. Por lo que,  si generaremos una página solo los dispositivos que esten conectados  a la red del ESP32 la podran ver.
+La principal diferencia entre las dos consiste en que ahora el ESP32 creara su propia red Wi-Fi. Por lo que,  si generaremos una página web solo los dispositivos que esten conectados  a la red del ESP32 la podran ver.
 
 ### Parte 1 : Ejemplo de prueba
 
@@ -369,7 +369,8 @@ void loop()
     String currentLine = "";                // make a String to hold incoming data from the client
     while (client.connected()) {            // loop while the client's connected
       if (client.available()) { 
-        char c = client.read();                   // if the byte is a newline character
+        char c = client.read();
+        Serial.write(c);
         // if the current line is blank, you got two newline characters in a row.
         // that's the end of the client HTTP request, so send a response:
         if (currentLine.length() == 0) {
@@ -400,6 +401,8 @@ void loop()
 }
 ```
 
+> **Nota:** El texto del fichero HTML aparece dentro de un `string` en el fichero `index.cpp` y en el fichero principal se hace referencia a él mediante la línea de código: `extern String HTML`.
+
 ###### **Visualización de la conexión a la página web**
 
 ![Pagina web index.html](/images/web_index-html_STA.png)
@@ -418,15 +421,35 @@ Client disconnected.
 ###### **Diagrama de flujo**
 
 ```mermaid
-    flowchart LR;
-    WB --> SB
+    flowchart TB;
+
+    subgraph L [Programa principal]
+      LS[Escuchamos nuevos clienes] --> LS & CC
+      CC{Si nuevo cliente conectado} --> INC[Imprimimos por pantalla que hay un nuevo cliente]
+      INC --> WCC
+      subgraph WCC [Mientras el cliente este conectado y disponible]
+        IC([Imprimimos informacion nuevo cliente]) --> HTTP([Lanzamos las cabeceras HTTP]) --> HTML
+        HTML([Cargamos codigo HTML])
+      end
+      WCC -..-> ifCD{Si cliente desconectado} --> CD([Desconctamos la conexión])
+    end
+
+     subgraph B [Setup]
+      WS([Creamos AP con contraseña y ssid generadas]) --> IP([Imprimir IP]) --> SB([Iniciamos servidor])
+    end
+
+    B ====> L
+
+    style WCC stroke:#0d1017,stroke-width:2px,stroke-dasharray: 5 5
 ```
 
 ### Parte 3 : Encendido de LEDs por Wi-Fi
 
 ###### **Funcionamiento**
 
+El código en cuestión consiste en crear una página web, a la que podemos acceder conectandonos a la red Wi-Fi del procesador, en la que podemos controlar el encendido y apagado de dos LEDs.
 
+Para ello, dentro del codigo HTML definimos dos botones con dos estados, _ON_ y _OFF_, cada vez que se pulsen los botones se hara referencia a un _header_ del tipo `/<pin del boton>/<estado del LED>`, como por ejemplo `/26/on`, en función de la cabecera o _header_ lanzaremos la orden de poner el pin del LED al valor que se requiera.
 
 ###### **Código del programa**
 ```cpp
@@ -635,7 +658,32 @@ Client disconnected.
 
 ###### **Diagrama de flujo**
 
+```mermaid
+  flowchart TB;
 
+    subgraph L [Programa principal]
+      LS[Escuchamos nuevos clienes] --> LS & CC
+      CC{Si nuevo cliente conectado} --> INC[Imprimimos por pantalla que hay un nuevo cliente]
+      INC --> WCC
+      subgraph WCC [Mientras el cliente este conectado y disponible]
+        IC([Imprimimos informacion nuevo cliente]) --> HTTP([Lanzamos las cabeceras HTTP]) --> HTML
+        HTML([Cargamos codigo HTML])
+        26ON{Si recibimos header del pin 26 a valor alto} --> L26A([LED 26 a valor alto])
+        27ON{Si recibimos header del pin 27 a valor alto} --> L27A([LED 27 a valor alto])
+        26OFF{Si recibimos header del pin 26 a valor bajo} --> L26B([LED 26 a valor bajo])
+        27OFF{Si recibimos header del pin 27 a valor bajo} --> L27B([LED 27 a valor bajo])
+      end
+      WCC -..-> ifCD{Si cliente desconectado} --> CD([Desconctamos la conexión])
+    end
+
+     subgraph B [Setup]
+      WS([Creamos AP con contraseña y ssid generadas]) --> IP([Imprimir IP]) --> SB([Iniciamos servidor])
+    end
+
+    B ====> L
+
+    style WCC stroke:#0d1017,stroke-width:2px,stroke-dasharray: 5 5
+```
 
 ## Comunciación Bluetooth Low Energy (BLE)
 
@@ -645,7 +693,7 @@ El *Bluetooth low energy* consiste en una variente del *Bluetooth* que consume m
 
 En *BLE*, tenemos dos tipos de dispositivos: el cliente y el servidor. El servidor emite una señal con tal que los clientes puedan encontrarlo y leer sus datos. Por lo que el cliente esta a la esucha de servidores y cuando encuentra el que esta buscando lee la información de este.
 
-Por lo que, en este ejercicio, aparecen dos códigos, uno del servidor y otro del cliente.
+Por lo que, en este ejercicio, aparecen tres bloques de código: el servidor, el escaneador y el cliente.
 
 ###### **Código del servidor**
 
@@ -689,6 +737,12 @@ void loop() {
 }
 ```
 
+###### **Salida por terminal del servidor**
+
+```
+
+```
+
 ###### **Código del escaneador**
 
 ```cpp
@@ -730,20 +784,7 @@ void loop() {
 }
 ```
 
-###### **Código del cliente**
-
-```cpp
-```
-
-###### **Salida por terminal**
-
-Servidor:
-
-```
-
-```
-
-Escaneador:
+###### **Salida por terminal del scanner**
 
 ```
 Advertised Device: Name: , Address: 0e:96:82:2c:d1:c6, manufacturer data: 060001092002dfe0172dd546b939484ea970e97cfe84587204aa2c9589, rssi: -57 
@@ -757,9 +798,16 @@ Devices found: 7
 Scan done!
 ```
 
-Cliente:
+###### **Código del cliente**
+
+```cpp
 
 ```
+
+###### **Salida por  terminal del cliente**
+
+```
+
 ```
 
 ###### **Diagrama de flujo**
@@ -771,9 +819,11 @@ Cliente:
 
     end
 
-    S ==> C;
+    S ==> SC ==> C;
 
     subgraph C [Cliente]
     end
 
+    subgraph SC [Scanner]
+    end
 ```
