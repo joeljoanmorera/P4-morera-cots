@@ -293,6 +293,7 @@ void loop()
     while (client.connected()) {            // loop while the client's connected
       if (client.available()) {             // if the byte is a newline character
         char c = client.read();
+         Serial.write(c);
         // if the current line is blank, you got two newline characters in a row.
         // that's the end of the client HTTP request, so send a response:
         if (currentLine.length() == 0) {
@@ -952,7 +953,7 @@ New value : Hola Mundo via BLE
 ###### **Diagrama de flujo**
 
 ```mermaid
-    flowchart LR
+    flowchart TD
 
     subgraph S [Servidor]
       SID(Iniciamos el dispositivo a nombre de 'ESP-32') --> SCR
@@ -969,7 +970,7 @@ New value : Hola Mundo via BLE
 
       CSC([Activamos el escaneo de los dispositivos cercanos]) --> ifCC
       
-      Advertise --> ifCC
+      AD([Recibimos el anuncio del servidor]) --> ifCC
 
       ifCC{Si orden de conectarse a servidor a valor alto} --> CC
 
