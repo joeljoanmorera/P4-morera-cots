@@ -105,6 +105,8 @@ HTTP server started
     HS([Iniciamos el servidor]) -..-> SI;
 ```
 
+***
+
 ### Parte 2 : HTML de un fichero de Markdown
 
 ###### **Funcionamiento**
@@ -166,6 +168,8 @@ void handle_root()
 ###### **Visualización de la conexión a la página web**
 
 ![Página web](/images/web_index-html_STA.png)
+
+****
 
 ## Comunicación Bluetooth Classic
 
@@ -236,6 +240,8 @@ Fin de la conexión
     RB([Leemos puerto Bluetooth]) --> WB
     
 ```
+
+***
 
 ## Generación página web mediante un AP
 
@@ -327,6 +333,8 @@ void loop()
 ###### **Visualización de la conexión a la página web**
 
 !["Página web"](./images/web_AP.png)
+
+***
 
 ### Parte 2: HTML de un fichero de Markdown
 
@@ -445,6 +453,8 @@ Client disconnected.
 
     style WCC stroke:#0d1017,stroke-width:2px,stroke-dasharray: 5 5
 ```
+
+***
 
 ### Parte 3 : Encendido de LEDs por Wi-Fi
 
@@ -687,6 +697,8 @@ Client disconnected.
 
     style WCC stroke:#0d1017,stroke-width:2px,stroke-dasharray: 5 5
 ```
+
+***
 
 ## Comunciación Bluetooth Low Energy (BLE)
 
